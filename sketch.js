@@ -6,6 +6,7 @@ const STAR_SPEED = 50;
 let yaw = 0;    // compass (alpha)
 let pitch = 0;  // gravity tilt (beta)
 let roll = 0;   // device roll (gamma)
+const alpha = 0.1; // 0.05 = smoother, 0.3 = snappier
 
 // Fixed world direction for star motion (North = -Z axis)
 const MOTION_DIR = { x: 0, y: 0, z: -1 };
@@ -20,9 +21,13 @@ function touchStarted() {
 
 // Listen to device orientation
 window.addEventListener("deviceorientation", e => {
-  yaw   = radians(e.alpha || 0); // Z axis (compass)
-  pitch = radians(e.beta  || 0); // X axis (gravity)
-  roll  = radians(e.gamma || 0); // Y axis (roll)
+  const nyaw   = radians(e.alpha || 0); // Z axis (compass)
+  const npitch = radians(e.beta  || 0); // X axis (gravity)
+  const nroll  = radians(e.gamma || 0); // Y axis (roll)
+
+  yaw += alpha * (nyaw - yaw);
+  pitch += alpha * (npitch - pitch);
+  roll += alpha * (nroll - roll);
 });
 
 function setup() {
@@ -35,7 +40,7 @@ function setup() {
 function draw() {
   background(0);
   translate(width * 0.5, height * 0.5);
-  text("Test 6 " + degrees(yaw).toFixed(3) + "\n" + degrees(pitch).toFixed(3) + "\n" + degrees(roll).toFixed(3), 0, 0);
+  text("Test 7 " + degrees(yaw).toFixed(3) + "\n" + degrees(pitch).toFixed(3) + "\n" + degrees(roll).toFixed(3), 0, 0);
   yaw = map(mouseX, 0, width, 0, radians(180));
   for (let i = 0; i < STAR_COUNT; i++) {
     stars[i].update();
