@@ -7,17 +7,11 @@ let yaw = 0;    // compass (alpha)
 let pitch = 0;  // gravity tilt (beta)
 let roll = 0;   // device roll (gamma)
 let _y = 0, _p = 0, _r = 0;
-let lastT = null;
 
-const GYRO_WEIGHT = 0.995; // drift correction strength
-const YAW_SMOOTH = 0.08;     // visual smoothing
+const SMOOTH = 0.15; // try 0.1–0.25
 
 function shortestAngle(a, b) {
   return Math.atan2(Math.sin(b - a), Math.cos(b - a));
-}
-
-function ema(prev, next, a) {
-  return prev + a * (next - prev);
 }
 
 // Fixed world direction for star motion (North = -Z axis)
@@ -30,41 +24,20 @@ function touchStarted() {
   }
 }
 
-// gyroscope integration (fast)
-window.addEventListener("devicemotion", e => {
-  if (!e.rotationRate) return;
-
-  if (!lastT) {
-    lastT = e.timeStamp;
-    return;
-  }
-
-  const dt = (e.timeStamp - lastT) / 1000;
-  lastT = e.timeStamp;
-
-  _r += rad(e.rotationRate.beta  || 0) * dt;
-  _p += rad(e.rotationRate.gamma || 0) * dt;
-  _y += rad(e.rotationRate.alpha || 0) * dt;
-});
-
 // Listen to device orientation
 window.addEventListener("deviceorientation", e => {
   //if (e.alpha == null) return;
   
-  const ay   = radians(e.alpha || 0); // Z axis (compass)
-  const ap = radians(e.beta  || 0); // X axis (gravity)
-  const ar  = radians(e.gamma || 0); // Y axis (roll)
-
-  _y += (1 - GYRO_WEIGHT) * shortestAngle(_y, ay);
-  _p += (1 - GYRO_WEIGHT) * shortestAngle(_p, ap);
-  _r += (1 - GYRO_WEIGHT) * shortestAngle(_r, ar);
+  _y   = radians(e.alpha || 0); // Z axis (compass)
+  _p = radians(e.beta  || 0); // X axis (gravity)
+  _r  = radians(e.gamma || 0); // Y axis (roll)
 });
 
 // final smooth output (USE THESE)
 function updateOrientation() {
-  yaw   = ema(yaw, _y, YAW_SMOOTH);
-  pitch = _p;
-  roll  = _r;
+  yaw   += SMOOTH * shortestAngle(yaw, _y);
+  pitch += SMOOTH * shortestAngle(pitch, _p);
+  roll  += SMOOTH * shortestAngle(roll, _r);
 }
 
 function setup() {
@@ -81,7 +54,7 @@ function mouseDragged() {
 function draw() {
   background(0);
   translate(width * 0.5, height * 0.5);
-  text("Test 8c " + degrees(yaw).toFixed(3) + "\n" + degrees(pitch).toFixed(3) + "\n" + degrees(roll).toFixed(3), 0, 0);
+  text("Test 8d " + degrees(yaw).toFixed(3) + "\n" + degrees(pitch).toFixed(3) + "\n" + degrees(roll).toFixed(3), 0, 0);
   
   updateOrientation();
   
