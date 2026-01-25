@@ -6,11 +6,22 @@ const STAR_SPEED = 50;
 let yaw = 0;    // compass (alpha)
 let pitch = 0;  // gravity tilt (beta)
 let roll = 0;   // device roll (gamma)
-const alpha = 0.1; // 0.05 = smoother, 0.3 = snappier
+let _y = 0, _p = 0, _r = 0;
+let lastT = null;
+
+const GYRO_WEIGHT = 0.98; // drift correction strength
+const SMOOTH = 0.12;     // visual smoothing
+
+function shortestAngle(a, b) {
+  return Math.atan2(Math.sin(b - a), Math.cos(b - a));
+}
+
+function ema(prev, next, a) {
+  return prev + a * (next - prev);
+}
 
 // Fixed world direction for star motion (North = -Z axis)
 const MOTION_DIR = { x: 0, y: 0, z: -1 };
-
 
 function touchStarted() {
   if (typeof DeviceOrientationEvent !== "undefined" &&
@@ -19,16 +30,44 @@ function touchStarted() {
   }
 }
 
+// gyroscope integration (fast)
+window.addEventListener("devicemotion", e => {
+  if (!e.rotationRate) return;
+
+  if (!lastT) {
+    lastT = e.timeStamp;
+    return;
+  }
+
+  const dt = (e.timeStamp - lastT) / 1000;
+  lastT = e.timeStamp;
+
+  _r += rad(e.rotationRate.beta  || 0) * dt;
+  _p += rad(e.rotationRate.gamma || 0) * dt;
+  _y += rad(e.rotationRate.alpha || 0) * dt;
+});
+
 // Listen to device orientation
 window.addEventListener("deviceorientation", e => {
-  const nyaw   = radians(e.alpha || 0); // Z axis (compass)
-  const npitch = radians(e.beta  || 0); // X axis (gravity)
-  const nroll  = radians(e.gamma || 0); // Y axis (roll)
+  //if (e.alpha == null) return;
+  
+  const ay   = radians(e.alpha || 0); // Z axis (compass)
+  const ap = radians(e.beta  || 0); // X axis (gravity)
+  const ar  = radians(e.gamma || 0); // Y axis (roll)
 
-  yaw += alpha * (nyaw - yaw);
-  pitch += alpha * (npitch - pitch);
-  roll += alpha * (nroll - roll);
+  _y += (1 - GYRO_WEIGHT) * shortestAngle(_y, ay);
+  _p += (1 - GYRO_WEIGHT) * shortestAngle(_p, ap);
+  _r += (1 - GYRO_WEIGHT) * shortestAngle(_r, ar);
 });
+
+// final smooth output (USE THESE)
+function updateOrientation() {
+  yaw   = ema(yaw,   _y, SMOOTH);
+  pitch = ema(pitch, _p, SMOOTH);
+  roll  = ema(roll,  _r, SMOOTH);
+
+  requestAnimationFrame(updateOrientation);
+}
 
 function setup() {
   createCanvas(windowWidth, windowHeight, P2D);
@@ -40,7 +79,10 @@ function setup() {
 function draw() {
   background(0);
   translate(width * 0.5, height * 0.5);
-  text("Test 7 " + degrees(yaw).toFixed(3) + "\n" + degrees(pitch).toFixed(3) + "\n" + degrees(roll).toFixed(3), 0, 0);
+  text("Test 8 " + degrees(yaw).toFixed(3) + "\n" + degrees(pitch).toFixed(3) + "\n" + degrees(roll).toFixed(3), 0, 0);
+  
+  updateOrientation();
+  
   yaw = map(mouseX, 0, width, 0, radians(180));
   for (let i = 0; i < STAR_COUNT; i++) {
     stars[i].update();
