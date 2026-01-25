@@ -8,7 +8,7 @@ let pitch = 0;  // gravity tilt (beta)
 let roll = 0;   // device roll (gamma)
 
 // Fixed world direction for star motion (North = -Z axis)
-const MOTION_DIR = { x: 0, y: 0, z: 1 };
+const MOTION_DIR = { x: 0, y: 0, z: -1 };
 
 // iOS permission helper
 function touchStarted() {
