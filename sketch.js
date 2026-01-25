@@ -9,8 +9,8 @@ let roll = 0;   // device roll (gamma)
 let _y = 0, _p = 0, _r = 0;
 let lastT = null;
 
-const GYRO_WEIGHT = 0.98; // drift correction strength
-const SMOOTH = 0.12;     // visual smoothing
+const GYRO_WEIGHT = 0.995; // drift correction strength
+const YAW_SMOOTH = 0.08;     // visual smoothing
 
 function shortestAngle(a, b) {
   return Math.atan2(Math.sin(b - a), Math.cos(b - a));
@@ -62,9 +62,9 @@ window.addEventListener("deviceorientation", e => {
 
 // final smooth output (USE THESE)
 function updateOrientation() {
-  yaw   = ema(yaw,   _y, SMOOTH);
-  pitch = ema(pitch, _p, SMOOTH);
-  roll  = ema(roll,  _r, SMOOTH);
+  yaw   = ema(yaw, _y, YAW_SMOOTH);
+  pitch = _p;
+  roll  = _r;
 
   requestAnimationFrame(updateOrientation);
 }
@@ -79,7 +79,7 @@ function setup() {
 function draw() {
   background(0);
   translate(width * 0.5, height * 0.5);
-  text("Test 8 " + degrees(yaw).toFixed(3) + "\n" + degrees(pitch).toFixed(3) + "\n" + degrees(roll).toFixed(3), 0, 0);
+  text("Test 8a " + degrees(yaw).toFixed(3) + "\n" + degrees(pitch).toFixed(3) + "\n" + degrees(roll).toFixed(3), 0, 0);
   
   updateOrientation();
   
