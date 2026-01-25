@@ -74,14 +74,17 @@ function setup() {
   }
 }
 
+function mouseDragged() {
+  yaw = map(mouseX, 0, width, 0, radians(180));
+}
+
 function draw() {
   background(0);
   translate(width * 0.5, height * 0.5);
-  text("Test 8b " + degrees(yaw).toFixed(3) + "\n" + degrees(pitch).toFixed(3) + "\n" + degrees(roll).toFixed(3), 0, 0);
+  text("Test 8c " + degrees(yaw).toFixed(3) + "\n" + degrees(pitch).toFixed(3) + "\n" + degrees(roll).toFixed(3), 0, 0);
   
   updateOrientation();
   
-  yaw = map(mouseX, 0, width, 0, radians(180));
   for (let i = 0; i < STAR_COUNT; i++) {
     stars[i].update();
     stars[i].show(yaw, pitch, roll);
