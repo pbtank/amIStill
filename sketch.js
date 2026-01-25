@@ -65,8 +65,6 @@ function updateOrientation() {
   yaw   = ema(yaw, _y, YAW_SMOOTH);
   pitch = _p;
   roll  = _r;
-
-  requestAnimationFrame(updateOrientation);
 }
 
 function setup() {
@@ -79,7 +77,7 @@ function setup() {
 function draw() {
   background(0);
   translate(width * 0.5, height * 0.5);
-  text("Test 8a " + degrees(yaw).toFixed(3) + "\n" + degrees(pitch).toFixed(3) + "\n" + degrees(roll).toFixed(3), 0, 0);
+  text("Test 8b " + degrees(yaw).toFixed(3) + "\n" + degrees(pitch).toFixed(3) + "\n" + degrees(roll).toFixed(3), 0, 0);
   
   updateOrientation();
   
