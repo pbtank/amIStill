@@ -35,7 +35,7 @@ function setup() {
 function draw() {
   background(0);
   translate(width * 0.5, height * 0.5);
-  text("Test 5 " + yaw + "\n" + pitch + "\n" + roll, 0, 0);
+  text("Test 6 " + yaw.toFixed(3) + "\n" + pitch.toFixed(3) + "\n" + roll.toFixed(3), 0, 0);
   yaw = map(mouseX, 0, width, 0, radians(180));
   for (let i = 0; i < STAR_COUNT; i++) {
     stars[i].update();
