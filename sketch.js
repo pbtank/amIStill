@@ -5,6 +5,7 @@ const STAR_SPEED = 50;
 // --- DEVICE ORIENTATION ---
 let yaw = 0;    // compass (alpha)
 let pitch = 0;  // gravity tilt (beta)
+let roll = 0;   // device roll (gamma)
 
 // Fixed world direction for star motion (North = -Z axis)
 const MOTION_DIR = { x: 0, y: 0, z: -1 };
@@ -21,6 +22,7 @@ function touchStarted() {
 window.addEventListener("deviceorientationabsolute", e => {
   yaw   = radians(e.alpha || 0); // Z axis (compass)
   pitch = radians(e.beta  || 0); // X axis (gravity)
+  roll  = radians(e.gamma || 0); // Y axis (roll)
 });
 
 function setup() {
@@ -33,11 +35,11 @@ function setup() {
 function draw() {
   background(0);
   translate(width * 0.5, height * 0.5);
-  text("Test 1", 0, 0);
+  text("Test 2", 0, 0);
   yaw = map(mouseX, 0, width, 0, radians(180));
   for (let i = 0; i < STAR_COUNT; i++) {
     stars[i].update();
-    stars[i].show(yaw, pitch);
+    stars[i].show(yaw, pitch, roll);
   }
 }
 
@@ -64,36 +66,51 @@ function Star() {
     }
   };
 
-  this.show = function (yaw, pitch) {
+  this.show = function (yaw, pitch, roll) {
 
-    // ---- WORLD → CAMERA (inverse device rotation) ----
+    // ---- WORLD → CAMERA (inverse device rotation with roll) ----
     let cy = cos(-yaw), sy = sin(-yaw);
     let cp = cos(-pitch), sp = sin(-pitch);
+    let cr = cos(-roll), sr = sin(-roll);
 
     // current position
+    // Yaw rotation (around Y-axis)
     let x1 =  cy * this.x + sy * this.z;
     let z1 = -sy * this.x + cy * this.z;
-    let y1 =  cp * this.y - sp * z1;
+    
+    // Pitch rotation (around X-axis)
+    let y2 =  cp * this.y - sp * z1;
     let z2 =  sp * this.y + cp * z1;
+    
+    // Roll rotation (around Z-axis)
+    let x3 =  cr * x1 - sr * y2;
+    let y3 =  sr * x1 + cr * y2;
 
     // previous position (for trails)
     let px = this.x - MOTION_DIR.x * this.trailLen;
     let py = this.y - MOTION_DIR.y * this.trailLen;
     let pz = this.z - MOTION_DIR.z * this.trailLen;
     
+    // Yaw rotation
     let px1 =  cy * px + sy * pz;
     let pz1 = -sy * px + cy * pz;
-    let py1 =  cp * py - sp * pz1;
+    
+    // Pitch rotation
+    let py2 =  cp * py - sp * pz1;
     let pz2 =  sp * py + cp * pz1;
+    
+    // Roll rotation
+    let px3 =  cr * px1 - sr * py2;
+    let py3 =  sr * px1 + cr * py2;
 
     if (z2 < 1 || pz2 < 1) return;
 
     // ---- PROJECTION ----
-    let sxx = (x1 / z2) * width;
-    let syy = (y1 / z2) * height;
+    let sxx = (x3 / z2) * width;
+    let syy = (y3 / z2) * height;
 
-    let pxx = (px1 / pz2) * width;
-    let pyy = (py1 / pz2) * height;
+    let pxx = (px3 / pz2) * width;
+    let pyy = (py3 / pz2) * height;
 
     let w = map(z2, 0, width * 2, 3, 0);
     let c1 = map(pz2, width * 0.5, width*2, 255, 50);
