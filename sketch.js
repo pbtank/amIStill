@@ -8,7 +8,7 @@ let pitch = 0;  // gravity tilt (beta)
 let roll = 0;   // device roll (gamma)
 
 // Fixed world direction for star motion (North = -Z axis)
-const MOTION_DIR = { x: 0, y: 1, z: 0 };
+const MOTION_DIR = { x: 0, y: 0, z: 1 };
 
 // iOS permission helper
 function touchStarted() {
@@ -35,7 +35,7 @@ function setup() {
 function draw() {
   background(0);
   translate(width * 0.5, height * 0.5);
-  text("Test 3", 0, 0);
+  text("Test 3 " + yaw + " " + pitch + " " + yaw, 0, 0);
   yaw = map(mouseX, 0, width, 0, radians(180));
   for (let i = 0; i < STAR_COUNT; i++) {
     stars[i].update();
