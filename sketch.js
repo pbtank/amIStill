@@ -89,7 +89,7 @@ function draw() {
   cameraZ = (height/2)/tan(PI/6);
   // translate(0, 0, -cameraZ);
   rotateZ(-yaw);
-  rotateY(-pitch);
+  rotateX(-pitch);
   rotateY(-roll);
   // translate(0, 0, cameraZ);
   stroke(0);
@@ -127,7 +127,7 @@ function draw() {
   
   hud.clear();
   hud.fill(255, 0, 0);
-  hud.text("Test 9 \nYaw: " + degrees(yaw).toFixed(3) + "\nPitch:" + degrees(pitch).toFixed(3) + "\nRoll:" + degrees(roll).toFixed(3), 50, 50);
+  hud.text("Test 9a \nYaw: " + degrees(yaw).toFixed(3) + "\nPitch:" + degrees(pitch).toFixed(3) + "\nRoll:" + degrees(roll).toFixed(3), 50, 50);
   // hud.rect(0, 0, 100, 100);
   push();
   resetMatrix();
