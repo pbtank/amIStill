@@ -19,7 +19,7 @@ function touchStarted() {
 }
 
 // Listen to device orientation
-window.addEventListener("deviceorientationabsolute", e => {
+window.addEventListener("deviceorientation", e => {
   yaw   = radians(e.alpha || 0); // Z axis (compass)
   pitch = radians(e.beta  || 0); // X axis (gravity)
   roll  = radians(e.gamma || 0); // Y axis (roll)
@@ -35,7 +35,7 @@ function setup() {
 function draw() {
   background(0);
   translate(width * 0.5, height * 0.5);
-  text("Test 4 " + yaw + "\n" + pitch + "\n" + yaw, 0, 0);
+  text("Test 5 " + yaw + "\n" + pitch + "\n" + roll, 0, 0);
   yaw = map(mouseX, 0, width, 0, radians(180));
   for (let i = 0; i < STAR_COUNT; i++) {
     stars[i].update();
