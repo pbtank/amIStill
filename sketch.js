@@ -54,9 +54,15 @@ function mouseDragged() {
 function draw() {
   background(0);
   translate(width * 0.5, height * 0.5);
-  text("Test 8d " + degrees(yaw).toFixed(3) + "\n" + degrees(pitch).toFixed(3) + "\n" + degrees(roll).toFixed(3), 0, 0);
+  text("Test 8e " + degrees(yaw).toFixed(3) + "\n" + degrees(pitch).toFixed(3) + "\n" + degrees(roll).toFixed(3), 0, 0);
   
   updateOrientation();
+
+  // apply REAL-WORLD rotation
+  // (inverse rotation = camera transform)
+  rotateZ(-yaw);
+  rotateX(-pitch);
+  rotateY(-roll);
   
   for (let i = 0; i < STAR_COUNT; i++) {
     stars[i].update();
