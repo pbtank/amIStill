@@ -11,7 +11,7 @@ let _gravity = null;
 let _north;
 let _magnetometer = null;
 
-const SMOOTH = 0.15; // try 0.1–0.25
+const SMOOTH = 0.1; // try 0.1–0.25
 
 function handleMotion(event) {
   // Get gravity vector from accelerometer (including gravity)
