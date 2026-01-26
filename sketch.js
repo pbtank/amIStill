@@ -100,6 +100,7 @@ function setup() {
 
 function draw() {
   background(0);
+  // getSensors();
   //translate(width * 0.5, height * 0.5);
 
   // updateOrientation();
@@ -162,7 +163,7 @@ function draw() {
   // hud text
   hud.clear();
   hud.fill(255, 0, 0);
-  hud.text("Test 9h", 10, 30);
+  hud.text("Test 10", 10, 30);
   if (gravity) {
     hud.text("g : " + gravity.x.toFixed(3) + ", " + gravity.y.toFixed(3) + ", " + gravity.z.toFixed(3), 50, 50);
   }
@@ -240,15 +241,15 @@ function windowResized() {
 function drawWorldLockedArrow() {
   push();
   
-  // Arrow pointing north and 30° up
+  // Arrow pointing gravity direction
   stroke(255, 100, 100);
   strokeWeight(5);
   
   // Direction in world space
   let len = 200;
-  line(0, 0, 0, 0, -len * 0.866, -len * 0.5);
+  line(0, 0, 0, gravity.x, gravity.y, gravity.z);
   
-  translate(0, -len * 0.866, -len * 0.5);
+  translate(gravity.x, gravity.y, gravity.z);
   fill(255, 100, 100);
   noStroke();
   rotateX(PI / 2);
