@@ -40,7 +40,10 @@ function updateOrientation() {
   roll  += SMOOTH * shortestAngle(roll, _r);
 
   // Convert to rotation matrix (avoids gimbal lock)
-  orientationMatrix = eulerToRotationMatrix(yaw, pitch, roll);
+  // orientationMatrix = eulerToRotationMatrix(yaw, pitch, roll);
+  let cQuat = eulerToQuaternion(yaw, pitch, roll);
+
+  orientationMatrix = quaternionToMatrix(cQuat);
 }
 
 function setup() {
@@ -123,7 +126,7 @@ function draw() {
   // hud text
   hud.clear();
   hud.fill(255, 0, 0);
-  hud.text("Test 9b \nYaw: " + degrees(yaw).toFixed(3) + "\nPitch:" + degrees(pitch).toFixed(3) + "\nRoll:" + degrees(roll).toFixed(3), 50, 50);
+  hud.text("Test 9c \nYaw: " + degrees(yaw).toFixed(3) + "\nPitch:" + degrees(pitch).toFixed(3) + "\nRoll:" + degrees(roll).toFixed(3), 50, 50);
   push();
   resetMatrix();
   image(hud, -width/2, -height/2);
@@ -223,17 +226,17 @@ function drawReferenceGrid() {
     line(-250, 0, i * 50, 250, 0, i * 50);
   }
   
-  // Compass directions
-  fill(100, 200, 100);
-  noStroke();
-  textAlign(CENTER, CENTER);
-  textSize(20);
+  // // Compass directions
+  // fill(100, 200, 100);
+  // noStroke();
+  // textAlign(CENTER, CENTER);
+  // textSize(20);
   
-  push();
-  translate(0, -10, -200);
-  rotateX(PI / 2);
-  text('N', 0, 0);
-  pop();
+  // push();
+  // translate(0, -10, -200);
+  // rotateX(PI / 2);
+  // text('N', 0, 0);
+  // pop();
   
   pop();
 }

@@ -58,3 +58,33 @@ function applyDeviceOrientation() {
   // World coordinates: X=east, Y=up, Z=south
   rotateX(PI / 2); // Align Y-up
 }
+
+// Alternative: Use quaternion directly (even more robust)
+function eulerToQuaternion(alpha, beta, gamma) {
+  let cA = Math.cos(alpha / 2);
+  let sA = Math.sin(alpha / 2);
+  let cB = Math.cos(beta / 2);
+  let sB = Math.sin(beta / 2);
+  let cG = Math.cos(gamma / 2);
+  let sG = Math.sin(gamma / 2);
+  
+  // ZXY order quaternion
+  let w = cA * cB * cG + sA * sB * sG;
+  let x = cA * sB * cG - sA * cB * sG;
+  let y = cA * cB * sG + sA * sB * cG;
+  let z = sA * cB * cG - cA * sB * sG;
+  
+  return {w, x, y, z};
+}
+
+// Convert quaternion to rotation matrix
+function quaternionToMatrix(q) {
+  let w = q.w, x = q.x, y = q.y, z = q.z;
+  
+  return [
+    1 - 2*y*y - 2*z*z, 2*x*y - 2*w*z, 2*x*z + 2*w*y, 0,
+    2*x*y + 2*w*z, 1 - 2*x*x - 2*z*z, 2*y*z - 2*w*x, 0,
+    2*x*z - 2*w*y, 2*y*z + 2*w*x, 1 - 2*x*x - 2*y*y, 0,
+    0, 0, 0, 1
+  ];
+}
