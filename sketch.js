@@ -73,7 +73,7 @@ function draw() {
 
   updateOrientation();
 
-  if (orientationMatrix) {
+  if (deviceQuat) {
     // Apply device orientation compensation
     applyDeviceOrientation();
   }
@@ -132,7 +132,7 @@ function draw() {
   // hud text
   hud.clear();
   hud.fill(255, 0, 0);
-  hud.text("Test 9d \nYaw: " + degrees(yaw).toFixed(3) + "\nPitch:" + degrees(pitch).toFixed(3) + "\nRoll:" + degrees(roll).toFixed(3), 50, 50);
+  hud.text("Test 9e \nYaw: " + degrees(yaw).toFixed(3) + "\nPitch:" + degrees(pitch).toFixed(3) + "\nRoll:" + degrees(roll).toFixed(3), 50, 50);
   push();
   resetMatrix();
   image(hud, -width/2, -height/2);
