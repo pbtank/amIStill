@@ -27,6 +27,11 @@ function multiplyQuaternions(q1, q2) {
   };
 }
 
+// Conjugate (inverse for unit quaternions)
+function conjugateQuaternion(q) {
+  return {w: q.w, x: -q.x, y: -q.y, z: -q.z};
+}
+
 // Convert Euler angles to rotation matrix (ZXY intrinsic rotation)
 function eulerToRotationMatrix(alpha, beta, gamma) {
   // Pre-calculate trig values
