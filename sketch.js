@@ -105,13 +105,14 @@ function draw() {
 
   // updateOrientation();
 
-  if (worldMatrix) {
-    applyWorldTransform();
+  // if (worldMatrix) {
+  //   applyWorldTransform();
+  // }
+  if (gravity) {
+    // Draw world-locked content
+    drawWorldLockedArrow();
+    drawReferenceGrid();
   }
-
-  // Draw world-locked content
-  drawWorldLockedArrow();
-  drawReferenceGrid();
 
   // // apply REAL-WORLD rotation
   // // (inverse rotation = camera transform)
@@ -163,7 +164,7 @@ function draw() {
   // hud text
   hud.clear();
   hud.fill(255, 0, 0);
-  hud.text("Test 10", 10, 30);
+  hud.text("Test 10a", 10, 30);
   if (gravity) {
     hud.text("g : " + gravity.x.toFixed(3) + ", " + gravity.y.toFixed(3) + ", " + gravity.z.toFixed(3), 50, 50);
   }
@@ -247,9 +248,9 @@ function drawWorldLockedArrow() {
   
   // Direction in world space
   let len = 200;
-  line(0, 0, 0, gravity.x, gravity.y, gravity.z);
+  line(0, 0, 0, gravity.x*len, gravity.y*len, gravity.z*len);
   
-  translate(gravity.x, gravity.y, gravity.z);
+  translate(gravity.x*len, gravity.y*len, gravity.z*len);
   fill(255, 100, 100);
   noStroke();
   rotateX(PI / 2);
