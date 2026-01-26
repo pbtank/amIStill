@@ -17,37 +17,70 @@ function shortestAngle(a, b) {
 // Fixed world direction for star motion (North = -Z axis)
 // const MOTION_DIR = { x: 0, y: 0, z: -1 };
 
-function touchStarted() {
-  if (typeof DeviceOrientationEvent !== "undefined" &&
-      typeof DeviceOrientationEvent.requestPermission === "function") {
-    DeviceOrientationEvent.requestPermission();
-  }
-}
+// function touchStarted() {
+//   if (typeof DeviceOrientationEvent !== "undefined" &&
+//       typeof DeviceOrientationEvent.requestPermission === "function") {
+//     DeviceOrientationEvent.requestPermission();
+//   }
+// }
 
-// Listen to device orientation
-window.addEventListener("deviceorientation", e => {
-  //if (e.alpha == null) return;
+// // Listen to device orientation
+// window.addEventListener("deviceorientation", e => {
+//   //if (e.alpha == null) return;
   
-  _y   = radians(e.alpha || 0); // Z axis (compass)
-  _p = radians(e.beta  || 0); // X axis (gravity)
-  _r  = radians(e.gamma || 0); // Y axis (roll)
-});
+//   _y   = radians(e.alpha || 0); // Z axis (compass)
+//   _p = radians(e.beta  || 0); // X axis (gravity)
+//   _r  = radians(e.gamma || 0); // Y axis (roll)
+// });
 
-// final smooth output (USE THESE)
-function updateOrientation() {
-  yaw   += SMOOTH * shortestAngle(yaw, _y);
-  pitch += SMOOTH * shortestAngle(pitch, _p);
-  roll  += SMOOTH * shortestAngle(roll, _r);
+// // final smooth output (USE THESE)
+// function updateOrientation() {
+//   yaw   += SMOOTH * shortestAngle(yaw, _y);
+//   pitch += SMOOTH * shortestAngle(pitch, _p);
+//   roll  += SMOOTH * shortestAngle(roll, _r);
 
-  // Convert to rotation matrix (avoids gimbal lock)
-  // orientationMatrix = eulerToRotationMatrix(yaw, pitch, roll);
-  deviceQuat = eulerToQuaternion(yaw, pitch, roll);
+//   // Convert to rotation matrix (avoids gimbal lock)
+//   // orientationMatrix = eulerToRotationMatrix(yaw, pitch, roll);
+//   deviceQuat = eulerToQuaternion(yaw, pitch, roll);
 
-  // orientationMatrix = quaternionToMatrix(cQuat);
-}
+//   // orientationMatrix = quaternionToMatrix(cQuat);
+// }
 
 function setup() {
   createCanvas(windowWidth, windowHeight, WEBGL);
+
+  // Try to use raw Magnetometer API (best option)
+  initMagnetometer();
+  
+  // Request permission for iOS 13+
+  if (typeof DeviceMotionEvent !== 'undefined' && 
+      typeof DeviceMotionEvent.requestPermission === 'function') {
+    DeviceMotionEvent.requestPermission()
+      .then(response => {
+        if (response === 'granted') {
+          window.addEventListener('devicemotion', handleMotion, true);
+        }
+      })
+      .catch(console.error);
+  } else {
+    window.addEventListener('devicemotion', handleMotion, true);
+  }
+  
+  // Fallback: Use DeviceOrientation if Magnetometer API not available
+  if (typeof DeviceOrientationEvent !== 'undefined' && 
+      typeof DeviceOrientationEvent.requestPermission === 'function') {
+    DeviceOrientationEvent.requestPermission()
+      .then(response => {
+        if (response === 'granted') {
+          window.addEventListener('deviceorientationabsolute', handleOrientation, true);
+        }
+      })
+      .catch(console.error);
+  } else {
+    window.addEventListener('deviceorientationabsolute', handleOrientation, true);
+    window.addEventListener('deviceorientation', handleOrientation, true);
+  }
+
   for (let i = 0; i < STAR_COUNT; i++) {
     stars[i] = new Star();
   }
@@ -71,11 +104,10 @@ function draw() {
   background(0);
   //translate(width * 0.5, height * 0.5);
 
-  updateOrientation();
+  // updateOrientation();
 
-  if (deviceQuat) {
-    // Apply device orientation compensation
-    applyDeviceOrientation();
+  if (worldMatrix) {
+    applyWorldTransform();
   }
 
   // Draw world-locked content
@@ -92,9 +124,9 @@ function draw() {
   // // translate(0, 0, cameraZ);
 
   // update all stars
-  for (let i = 0; i < STAR_COUNT; i++) {
-    stars[i].update();
-  }
+  // for (let i = 0; i < STAR_COUNT; i++) {
+  //   stars[i].update();
+  // }
 
   // ref sphere
   stroke(0);
@@ -132,7 +164,13 @@ function draw() {
   // hud text
   hud.clear();
   hud.fill(255, 0, 0);
-  hud.text("Test 9e \nYaw: " + degrees(yaw).toFixed(3) + "\nPitch:" + degrees(pitch).toFixed(3) + "\nRoll:" + degrees(roll).toFixed(3), 50, 50);
+  hud.text("Test 9f", 10, 30);
+  if (north) {
+    hud.text("g : " + gravity.x.toFixed(3) + ", " + gravity.y.toFixed(3) + ", " + gravity.z.toFixed(3)
+      + "\nM : " + north.x.toFixed(3) + ", " + north.y.toFixed(3) + ", " + north.z.toFixed(3), 50, 50);
+  } else {
+    hud.text("g : " + gravity.x.toFixed(3) + ", " + gravity.y.toFixed(3) + ", " + gravity.z.toFixed(3), 50, 50);
+  }
   push();
   resetMatrix();
   image(hud, -width/2, -height/2);
