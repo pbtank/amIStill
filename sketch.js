@@ -8,8 +8,6 @@ let pitch = 0;  // gravity tilt (beta)
 let roll = 0;   // device roll (gamma)
 let _y = 0, _p = 0, _r = 0;
 
-const SMOOTH = 0.15; // try 0.1–0.25
-
 function shortestAngle(a, b) {
   return Math.atan2(Math.sin(b - a), Math.cos(b - a));
 }
@@ -164,7 +162,7 @@ function draw() {
   // hud text
   hud.clear();
   hud.fill(255, 0, 0);
-  hud.text("Test 9g", 10, 30);
+  hud.text("Test 9h", 10, 30);
   if (gravity) {
     hud.text("g : " + gravity.x.toFixed(3) + ", " + gravity.y.toFixed(3) + ", " + gravity.z.toFixed(3), 50, 50);
   }

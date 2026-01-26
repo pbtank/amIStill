@@ -7,16 +7,30 @@ let north = null;        // Magnetic north vector
 let worldMatrix = null;  // Transform matrix from world to device
 let magnetometer = null; // Raw magnetometer reading
 
+let _gravity = null;
+let _north;
+let _magnetometer = null;
+
+const SMOOTH = 0.15; // try 0.1–0.25
+
 function handleMotion(event) {
   // Get gravity vector from accelerometer (including gravity)
   // This vector points DOWN in world coordinates
   if (event.accelerationIncludingGravity) {
     let g = event.accelerationIncludingGravity;
-    gravity = {
+    if (!gravity) {
+        gravity = {x:0, y:0, z:0};
+        _gravity = {x:0, y:0, z:0};
+    }
+    _gravity = {
       x: g.x || 0,
       y: g.y || 0,
       z: g.z || 0
     };
+
+    gravity.x += SMOOTH * (_gravity.x-gravity.x);
+    gravity.y += SMOOTH * (_gravity.y-gravity.y);
+    gravity.z += SMOOTH * (_gravity.z-gravity.z);
     
     // Normalize gravity vector
     let mag = Math.sqrt(gravity.x * gravity.x + gravity.y * gravity.y + gravity.z * gravity.z);
@@ -44,11 +58,20 @@ function handleOrientation(event) {
     };
   } else if (event.alpha !== null) {
     // Android - store Euler angles
-    magnetometer = {
+    if (!magnetometer) {
+      magnetometer = {alpha:0, beta:0, gamma:0};
+      _magnetometer = {alpha:0, beta:0, gamma:0};
+    }
+
+    _magnetometer = {
       alpha: event.alpha,
       beta: event.beta,
       gamma: event.gamma
     };
+
+    magnetometer.alpha += SMOOTH * (_magnetometer.alpha - magnetometer.alpha);
+    magnetometer.beta += SMOOTH * (_magnetometer.beta - magnetometer.beta);
+    magnetometer.gamma += SMOOTH * (_magnetometer.gamma - magnetometer.gamma);
   }
   
   updateWorldMatrix();
