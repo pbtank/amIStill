@@ -41,9 +41,9 @@ function updateOrientation() {
 
   // Convert to rotation matrix (avoids gimbal lock)
   // orientationMatrix = eulerToRotationMatrix(yaw, pitch, roll);
-  let cQuat = eulerToQuaternion(yaw, pitch, roll);
+  deviceQuat = eulerToQuaternion(yaw, pitch, roll);
 
-  orientationMatrix = quaternionToMatrix(cQuat);
+  // orientationMatrix = quaternionToMatrix(cQuat);
 }
 
 function setup() {
@@ -55,6 +55,12 @@ function setup() {
   hud = createGraphics(500, 500);
   hud.pixelDensity(1);
   hud.textSize(16);
+
+  // Track screen orientation using modern API
+  if (screen.orientation) {
+    screen.orientation.addEventListener('change', updateScreenOrientation);
+  }
+  updateScreenOrientation();
 }
 
 // function mouseDragged() {
@@ -126,7 +132,7 @@ function draw() {
   // hud text
   hud.clear();
   hud.fill(255, 0, 0);
-  hud.text("Test 9c \nYaw: " + degrees(yaw).toFixed(3) + "\nPitch:" + degrees(pitch).toFixed(3) + "\nRoll:" + degrees(roll).toFixed(3), 50, 50);
+  hud.text("Test 9d \nYaw: " + degrees(yaw).toFixed(3) + "\nPitch:" + degrees(pitch).toFixed(3) + "\nRoll:" + degrees(roll).toFixed(3), 50, 50);
   push();
   resetMatrix();
   image(hud, -width/2, -height/2);

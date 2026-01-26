@@ -1,4 +1,31 @@
 let orientationMatrix = null;
+let screenOrientation = 0;
+
+function updateScreenOrientation() {
+  // Use modern Screen Orientation API
+  if (screen.orientation) {
+    // orientation.angle: 0, 90, 180, 270
+    // orientation.type: 'portrait-primary', 'landscape-primary', etc.
+    screenOrientation = screen.orientation.angle || 0;
+  } else if (window.orientation !== undefined) {
+    // Fallback for older browsers (iOS Safari)
+    // window.orientation: 0, 90, -90, 180
+    screenOrientation = window.orientation;
+  } else {
+    // No orientation API, assume portrait
+    screenOrientation = 0;
+  }
+}
+
+// Multiply two quaternions
+function multiplyQuaternions(q1, q2) {
+  return {
+    w: q1.w * q2.w - q1.x * q2.x - q1.y * q2.y - q1.z * q2.z,
+    x: q1.w * q2.x + q1.x * q2.w + q1.y * q2.z - q1.z * q2.y,
+    y: q1.w * q2.y - q1.x * q2.z + q1.y * q2.w + q1.z * q2.x,
+    z: q1.w * q2.z + q1.x * q2.y - q1.y * q2.x + q1.z * q2.w
+  };
+}
 
 // Convert Euler angles to rotation matrix (ZXY intrinsic rotation)
 function eulerToRotationMatrix(alpha, beta, gamma) {
@@ -38,29 +65,38 @@ function eulerToRotationMatrix(alpha, beta, gamma) {
 }
 
 function applyDeviceOrientation() {
-  // Adjust for screen orientation (portrait/landscape)
-//   rotateZ(-screenOrientation);
+  // CRITICAL: Transform device coordinates to world coordinates
+  // Device: X=right, Y=down, Z=out of back
+  // World (desired): X=east, Y=up, Z=south (OpenGL convention)
   
-  // Apply the inverted rotation matrix to lock world coordinates
-  // We need to invert/transpose the matrix since we want to counter-rotate
-  let m = orientationMatrix;
+  // Step 1: Get the device orientation quaternion
+  let q = deviceQuat;
   
-  // Transpose the rotation part (inversion for rotation matrices)
+  // Step 2: Account for screen orientation (portrait/landscape)
+  let screenRotQuat = createScreenOrientationQuaternion();
+  q = multiplyQuaternions(q, screenRotQuat);
+  
+  // Step 3: Transform from device space to world space
+  // Rotate 90° around X to make Y point up instead of down
+  let deviceToWorld = {w: Math.cos(-Math.PI/4), x: Math.sin(-Math.PI/4), y: 0, z: 0};
+  q = multiplyQuaternions(deviceToWorld, q);
+  
+  // Step 4: Invert to get world-to-camera (we want inverse transform)
+  q = conjugateQuaternion(q);
+  
+  // Step 5: Apply the rotation matrix
+  let m = quaternionToMatrix(q);
   applyMatrix(
-    m[0], m[4], m[8], m[12],
-    m[1], m[5], m[9], m[13],
-    m[2], m[6], m[10], m[14],
-    m[3], m[7], m[11], m[15]
+    m[0], m[1], m[2], m[3],
+    m[4], m[5], m[6], m[7],
+    m[8], m[9], m[10], m[11],
+    m[12], m[13], m[14], m[15]
   );
-  
-  // Additional coordinate system adjustment
-  // Device coordinates: X=right, Y=down, Z=back
-  // World coordinates: X=east, Y=up, Z=south
-  rotateX(PI / 2); // Align Y-up
 }
 
 // Alternative: Use quaternion directly (even more robust)
 function eulerToQuaternion(alpha, beta, gamma) {
+  // Device orientation uses ZXY intrinsic rotation order
   let cA = Math.cos(alpha / 2);
   let sA = Math.sin(alpha / 2);
   let cB = Math.cos(beta / 2);
@@ -68,11 +104,11 @@ function eulerToQuaternion(alpha, beta, gamma) {
   let cG = Math.cos(gamma / 2);
   let sG = Math.sin(gamma / 2);
   
-  // ZXY order quaternion
-  let w = cA * cB * cG + sA * sB * sG;
+  // ZXY order
+  let w = cA * cB * cG - sA * sB * sG;
   let x = cA * sB * cG - sA * cB * sG;
   let y = cA * cB * sG + sA * sB * cG;
-  let z = sA * cB * cG - cA * sB * sG;
+  let z = sA * cB * cG + cA * sB * sG;
   
   return {w, x, y, z};
 }
@@ -87,4 +123,15 @@ function quaternionToMatrix(q) {
     2*x*z - 2*w*y, 2*y*z + 2*w*x, 1 - 2*x*x - 2*y*y, 0,
     0, 0, 0, 1
   ];
+}
+
+function createScreenOrientationQuaternion() {
+  // Rotate around Z-axis based on screen orientation
+  let angle = -screenOrientation * Math.PI / 180;
+  return {
+    w: Math.cos(angle / 2),
+    x: 0,
+    y: 0,
+    z: Math.sin(angle / 2)
+  };
 }
