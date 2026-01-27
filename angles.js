@@ -28,18 +28,18 @@ function handleMotion(event) {
       z: g.z || 0
     };
 
+    // Normalize gravity vector
+    let mag = Math.sqrt(_gravity.x * _gravity.x + _gravity.y * _gravity.y + _gravity.z * _gravity.z);
+    if (mag > 0.1) {
+      _gravity.x /= mag;
+      _gravity.y /= mag;
+      _gravity.z /= mag;
+    }
+
     gravity.x += SMOOTH * (_gravity.x-gravity.x);
     gravity.y += SMOOTH * (_gravity.y-gravity.y);
     gravity.z += SMOOTH * (_gravity.z-gravity.z);
-    
-    // Normalize gravity vector
-    let mag = Math.sqrt(gravity.x * gravity.x + gravity.y * gravity.y + gravity.z * gravity.z);
-    if (mag > 0.1) {
-      gravity.x /= mag;
-      gravity.y /= mag;
-      gravity.z /= mag;
-    }
-    
+     
     updateWorldMatrix();
   }
 }
