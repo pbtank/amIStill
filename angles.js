@@ -39,7 +39,7 @@ function handleMotion(event) {
     gravity.x += SMOOTH * (_gravity.x-gravity.x);
     gravity.y += SMOOTH * (_gravity.y-gravity.y);
     gravity.z += SMOOTH * (_gravity.z-gravity.z);
-     
+
     updateWorldMatrix();
   }
 }
@@ -64,10 +64,18 @@ function handleOrientation(event) {
     }
 
     _magnetometer = {
-      alpha: event.alpha,
-      beta: event.beta,
-      gamma: event.gamma
+      alpha: event.alpha || 0,
+      beta: event.beta || 0,
+      gamma: event.gamma || 0
     };
+    
+    // Normalize gravity vector
+    let mag = Math.sqrt(_magnetometer.alpha * _magnetometer.alpha + _magnetometer.beta * _magnetometer.beta + _magnetometer.gamma * _magnetometer.gamma);
+    if (mag > 0.1) {
+      _magnetometer.alpha /= mag;
+      _magnetometer.beta /= mag;
+      _magnetometer.gamma /= mag;
+    }
 
     magnetometer.alpha += SMOOTH * (_magnetometer.alpha - magnetometer.alpha);
     magnetometer.beta += SMOOTH * (_magnetometer.beta - magnetometer.beta);
@@ -106,9 +114,9 @@ function updateWorldMatrix() {
   
   // Step 1: Up vector is opposite of gravity (normalized)
   let up = normalize({
-    x: -gravity.x,
-    y: -gravity.y,
-    z: -gravity.z
+    x: gravity.x,
+    y: gravity.y,
+    z: gravity.z
   });
   
   // Step 2: Get magnetic field vector in device coordinates

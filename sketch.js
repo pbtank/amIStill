@@ -47,8 +47,8 @@ function shortestAngle(a, b) {
 function setup() {
   createCanvas(windowWidth, windowHeight, WEBGL);
 
-  // Try to use raw Magnetometer API (best option)
-  initMagnetometer();
+  // // Try to use raw Magnetometer API (best option)
+  // initMagnetometer();
   
   // Request permission for iOS 13+
   if (typeof DeviceMotionEvent !== 'undefined' && 
@@ -164,7 +164,7 @@ function draw() {
   // hud text
   hud.clear();
   hud.fill(255, 0, 0);
-  hud.text("Test 10d", 10, 30);
+  hud.text("Test 10e", 10, 30);
   if (gravity) {
     hud.text("g : " + gravity.x.toFixed(3) + ", " + gravity.y.toFixed(3) + ", " + gravity.z.toFixed(3), 50, 50);
   }
@@ -257,6 +257,25 @@ function drawWorldLockedArrow() {
   cone(10, 30);
   
   pop();
+  if (magnetometer) {
+    push();
+    
+    // Arrow pointing magneto direction
+    stroke(255, 100, 100);
+    strokeWeight(5);
+    
+    // Direction in world space
+    len = 200;
+    line(0, 0, 0, magnetometer.alpha*len, -magnetometer.beta*len, magnetometer.gamma*len);
+    
+    translate(magnetometer.alpha*len, -magnetometer.beta*len, magnetometer.gamma*len);
+    fill(255, 100, 100);
+    noStroke();
+    rotateX(PI / 2);
+    cone(10, 30);
+    
+    pop();
+  }
 }
 
 function drawReferenceGrid() {
