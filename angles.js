@@ -64,18 +64,18 @@ function handleOrientation(event) {
     }
 
     _magnetometer = {
-      alpha: event.alpha || 0,
-      beta: event.beta || 0,
-      gamma: event.gamma || 0
+      alpha: radians(event.alpha || 0),
+      beta: radians(event.beta || 0),
+      gamma: radians(event.gamma || 0)
     };
     
-    // Normalize gravity vector
-    let mag = Math.sqrt(_magnetometer.alpha * _magnetometer.alpha + _magnetometer.beta * _magnetometer.beta + _magnetometer.gamma * _magnetometer.gamma);
-    if (mag > 0.1) {
-      _magnetometer.alpha /= mag;
-      _magnetometer.beta /= mag;
-      _magnetometer.gamma /= mag;
-    }
+    // // Normalize gravity vector
+    // let mag = Math.sqrt(_magnetometer.alpha * _magnetometer.alpha + _magnetometer.beta * _magnetometer.beta + _magnetometer.gamma * _magnetometer.gamma);
+    // if (mag > 0.1) {
+    //   _magnetometer.alpha /= mag;
+    //   _magnetometer.beta /= mag;
+    //   _magnetometer.gamma /= mag;
+    // }
 
     magnetometer.alpha += SMOOTH * (_magnetometer.alpha - magnetometer.alpha);
     magnetometer.beta += SMOOTH * (_magnetometer.beta - magnetometer.beta);
@@ -132,9 +132,9 @@ function updateWorldMatrix() {
   } else {
     // Derive from orientation angles (less accurate when vertical)
     // This is a fallback - compute magnetic north in device frame
-    let alpha = (magnetometer.alpha || 0) * Math.PI / 180;
-    let beta = (magnetometer.beta || 0) * Math.PI / 180;
-    let gamma = (magnetometer.gamma || 0) * Math.PI / 180;
+    let alpha = magnetometer.alpha;
+    let beta = magnetometer.beta;
+    let gamma = magnetometer.gamma;
     
     // Approximate magnetic vector assuming device orientation
     // This becomes unreliable when device is vertical
