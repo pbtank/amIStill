@@ -164,7 +164,7 @@ function draw() {
   // hud text
   hud.clear();
   hud.fill(255, 0, 0);
-  hud.text("Test 10g", 10, 30);
+  hud.text("Test 10h", 10, 30);
   if (gravity) {
     hud.text("g : " + gravity.x.toFixed(3) + ", " + gravity.y.toFixed(3) + ", " + gravity.z.toFixed(3), 50, 50);
   }
@@ -266,9 +266,9 @@ function drawWorldLockedArrow() {
     
     // Direction in world space
     len = 200;
-    line(0, 0, 0, north.alpha*len, -north.beta*len, north.gamma*len);
+    line(0, 0, 0, north.x*len, -north.y*len, north.z*len);
     
-    translate(north.alpha*len, -north.beta*len, north.gamma*len);
+    translate(north.x*len, -north.y*len, north.z*len);
     fill(255, 100, 100);
     noStroke();
     rotateX(PI / 2);
