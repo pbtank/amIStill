@@ -81,9 +81,9 @@ function handleOrientation(event) {
     magnetometer.gamma += SMOOTH * (_magnetometer.gamma - magnetometer.gamma);
 
     let quat = eulerToQuaternion(radians(event.alpha), radians(event.beta), radians(event.gamma));
-    // let conjQuat = conjugateQuaternion(quat);
+    let conjQuat = conjugateQuaternion(quat);
 
-    worldMatrix = quaternionToMatrix4(quat);
+    worldMatrix = quaternionToMatrix4(conjQuat);
   }
   
   // updateWorldMatrix();
