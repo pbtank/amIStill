@@ -101,7 +101,7 @@ function initMagnetometer() {
           z: sensor.z,
           raw: true
         };
-        updateWorldMatrix();
+        // updateWorldMatrix();
       });
       sensor.start();
     } catch (error) {
@@ -183,12 +183,12 @@ function updateWorldMatrix() {
   // Step 6: Build rotation matrix
   // Columns are the basis vectors: [East, Up, South]
   // South is opposite of North (toward magnetic south)
-  worldMatrix = [
-    east.x,        up.x,        -northFinal.x,  0,
-    east.y,        up.y,        -northFinal.y,  0,
-    east.z,        up.z,        -northFinal.z,  0,
-    0,             0,            0,              1
-  ];
+  // worldMatrix = [
+  //   east.x,        up.x,        -northFinal.x,  0,
+  //   east.y,        up.y,        -northFinal.y,  0,
+  //   east.z,        up.z,        -northFinal.z,  0,
+  //   0,             0,            0,              1
+  // ];
   
   // Store computed north for debugging
   north = {
