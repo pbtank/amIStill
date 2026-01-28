@@ -83,7 +83,7 @@ function handleOrientation(event) {
     let quat = eulerToQuaternion(event.alpha, event.beta, event.gamma);
     let conjQuat = conjugateQuaternion(quat);
 
-    worldMatrix = quaternionToMatrix4(conjugateQuaternion);
+    worldMatrix = quaternionToMatrix4(conjQuat);
   }
   
   // updateWorldMatrix();
