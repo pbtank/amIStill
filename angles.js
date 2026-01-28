@@ -40,7 +40,7 @@ function handleMotion(event) {
     gravity.y += SMOOTH * (_gravity.y-gravity.y);
     gravity.z += SMOOTH * (_gravity.z-gravity.z);
 
-    updateWorldMatrix();
+    // updateWorldMatrix();
   }
 }
 
@@ -80,9 +80,13 @@ function handleOrientation(event) {
     magnetometer.alpha += SMOOTH * (_magnetometer.alpha - magnetometer.alpha);
     magnetometer.beta += SMOOTH * (_magnetometer.beta - magnetometer.beta);
     magnetometer.gamma += SMOOTH * (_magnetometer.gamma - magnetometer.gamma);
+
+    let quat = eulerToQuaternion(magnetometer.alpha, magnetometer.beta, magnetometer,gamma);
+
+    worldMatrix = quaternionToMatrix4(quat);
   }
   
-  updateWorldMatrix();
+  // updateWorldMatrix();
 }
 
 // Alternative: Use Magnetometer API directly (more accurate)
@@ -324,23 +328,47 @@ function applyDeviceOrientation() {
   );
 }
 
-// Alternative: Use quaternion directly (even more robust)
+// // Alternative: Use quaternion directly (even more robust)
+// function eulerToQuaternion(alpha, beta, gamma) {
+//   // Device orientation uses ZXY intrinsic rotation order
+//   let cA = Math.cos(alpha / 2);
+//   let sA = Math.sin(alpha / 2);
+//   let cB = Math.cos(beta / 2);
+//   let sB = Math.sin(beta / 2);
+//   let cG = Math.cos(gamma / 2);
+//   let sG = Math.sin(gamma / 2);
+  
+//   // ZXY order
+//   let w = cA * cB * cG - sA * sB * sG;
+//   let x = cA * sB * cG - sA * cB * sG;
+//   let y = cA * cB * sG + sA * sB * cG;
+//   let z = sA * cB * cG + cA * sB * sG;
+  
+//   return {w, x, y, z};
+// }
+
+// get quaternion from device orientation represented in euler angles
+// as alpha beta and gamma in radians
 function eulerToQuaternion(alpha, beta, gamma) {
-  // Device orientation uses ZXY intrinsic rotation order
-  let cA = Math.cos(alpha / 2);
-  let sA = Math.sin(alpha / 2);
-  let cB = Math.cos(beta / 2);
-  let sB = Math.sin(beta / 2);
-  let cG = Math.cos(gamma / 2);
-  let sG = Math.sin(gamma / 2);
-  
-  // ZXY order
-  let w = cA * cB * cG - sA * sB * sG;
-  let x = cA * sB * cG - sA * cB * sG;
-  let y = cA * cB * sG + sA * sB * cG;
-  let z = sA * cB * cG + cA * sB * sG;
-  
-  return {w, x, y, z};
+  let _x = beta * 0.5;
+  let _y = gamma * 0.5;
+  let _z = alpha * 0.5;
+
+  let cX = cos(_x);
+  let cY = cos(_y);
+  let cZ = cos(_z);
+
+  let sX = sin(_x);
+  let sZ = sin(_z);
+  let sY = sin(_y);
+
+  // taking order ZXY
+  let w = cX * cY * cZ - sX * sY * sZ;
+  let x = sX * cY * cZ - cX * sY * sZ;
+  let y = cX * sY * cZ + sX * cY * sZ;
+  let z = cX * cY * sZ + sX * sY * cZ;
+
+  return {w: w, x: x, y: y, z: z};
 }
 
 // Convert quaternion to rotation matrix
@@ -364,4 +392,39 @@ function createScreenOrientationQuaternion() {
     y: 0,
     z: Math.sin(angle / 2)
   };
+}
+
+function quaternionToMatrix3(q) {
+  let w = q.w;
+  let x = q.x;
+  let y = q.y;
+  let z = q.z;
+
+  let n = w * w + x * x + y * y + z * z;
+  let s = n === 0 ? 0 : 2 / n;
+  let wx = s * w * x, wy = s * w * y, wz = s * w * z;
+  let xx = s * x * x, xy = s * x * y, xz = s * x * z;
+  let yy = s * y * y, yz = s * y * z, zz = s * z * z;
+
+  return [1 - (yy + zz), xy - wz, xz + wy,
+          xy + wz, 1 - (xx + zz), yz - wx,
+          xz - wy, yz + wx, 1 - (xx + yy)];
+}
+
+function quaternionToMatrix4(q) {
+  let w = q.w;
+  let x = q.x;
+  let y = q.y;
+  let z = q.z;
+
+  let n = w * w + x * x + y * y + z * z;
+  let s = n === 0 ? 0 : 2 / n;
+  let wx = s * w * x, wy = s * w * y, wz = s * w * z;
+  let xx = s * x * x, xy = s * x * y, xz = s * x * z;
+  let yy = s * y * y, yz = s * y * z, zz = s * z * z;
+
+  return [1 - (yy + zz), xy - wz, xz + wy, 0,
+          xy + wz, 1 - (xx + zz), yz - wx, 0,
+          xz - wy, yz + wx, 1 - (xx + yy), 0,
+          0, 0, 0, 1];
 }

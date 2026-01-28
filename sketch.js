@@ -75,8 +75,8 @@ function setup() {
       })
       .catch(console.error);
   } else {
-    window.addEventListener('deviceorientationabsolute', handleOrientation, true);
-    // window.addEventListener('deviceorientation', handleOrientation, true);
+    // window.addEventListener('deviceorientationabsolute', handleOrientation, true);
+    window.addEventListener('deviceorientation', handleOrientation, true);
   }
 
   for (let i = 0; i < STAR_COUNT; i++) {
@@ -164,7 +164,7 @@ function draw() {
   // hud text
   hud.clear();
   hud.fill(255, 0, 0);
-  hud.text("Test 10h", 10, 30);
+  hud.text("Test 11", 10, 30);
   if (gravity) {
     hud.text("g : " + gravity.x.toFixed(3) + ", " + gravity.y.toFixed(3) + ", " + gravity.z.toFixed(3), 50, 50);
   }
@@ -257,9 +257,9 @@ function drawWorldLockedArrow() {
   cone(10, 30);
   
   pop();
-  if (north) {
+  if (worldMatrix) {
     push();
-    
+    applyMatrix(worldMatrix);
     // Arrow pointing magneto direction
     stroke(255, 100, 100);
     strokeWeight(5);
@@ -267,8 +267,8 @@ function drawWorldLockedArrow() {
     // Direction in world space
     len = 200;
     line(0, 0, 0, north.x*len, -north.y*len, north.z*len);
-    
-    translate(north.x*len, -north.y*len, north.z*len);
+    line(0, 0, 0, 1*len, 0, 0);
+    translate(1*len, 0, 0);
     fill(255, 100, 100);
     noStroke();
     rotateX(PI / 2);
