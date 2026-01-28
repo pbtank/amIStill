@@ -1,4 +1,3 @@
-let orientationMatrix = null;
 let screenOrientation = 0;
 
 // Direct sensor vector approach for world-locking
@@ -89,115 +88,94 @@ function handleOrientation(event) {
   // updateWorldMatrix();
 }
 
-// Alternative: Use Magnetometer API directly (more accurate)
-function initMagnetometer() {
-  if ('Magnetometer' in window) {
-    try {
-      const sensor = new Magnetometer({frequency: 60});
-      sensor.addEventListener('reading', () => {
-        magnetometer = {
-          x: sensor.x,
-          y: sensor.y,
-          z: sensor.z,
-          raw: true
-        };
-        // updateWorldMatrix();
-      });
-      sensor.start();
-    } catch (error) {
-      console.log('Magnetometer not available:', error);
-    }
-  }
-}
-
-function updateWorldMatrix() {
-  if (!gravity || !magnetometer) return;
+// function updateWorldMatrix() {
+//   if (!gravity || !magnetometer) return;
   
-  // Build orthonormal coordinate system from gravity and magnetometer
-  // World coordinate system: X=East, Y=Up, Z=South
+//   // Build orthonormal coordinate system from gravity and magnetometer
+//   // World coordinate system: X=East, Y=Up, Z=South
   
-  // Step 1: Up vector is opposite of gravity (normalized)
-  let up = normalize({
-    x: gravity.x,
-    y: gravity.y,
-    z: gravity.z
-  });
+//   // Step 1: Up vector is opposite of gravity (normalized)
+//   let up = normalize({
+//     x: gravity.x,
+//     y: gravity.y,
+//     z: gravity.z
+//   });
   
-  // Step 2: Get magnetic field vector in device coordinates
-  let magVec;
+//   // Step 2: Get magnetic field vector in device coordinates
+//   let magVec;
   
-  if (magnetometer.raw) {
-    // Raw magnetometer data (best!)
-    magVec = {
-      x: magnetometer.x,
-      y: magnetometer.y,
-      z: magnetometer.z
-    };
-  } else {
-    // Derive from orientation angles (less accurate when vertical)
-    // This is a fallback - compute magnetic north in device frame
-    let alpha = magnetometer.alpha;
-    let beta = magnetometer.beta;
-    let gamma = magnetometer.gamma;
+//   if (magnetometer.raw) {
+//     // Raw magnetometer data (best!)
+//     magVec = {
+//       x: magnetometer.x,
+//       y: magnetometer.y,
+//       z: magnetometer.z
+//     };
+//   } else {
+//     // Derive from orientation angles (less accurate when vertical)
+//     // This is a fallback - compute magnetic north in device frame
+//     let alpha = magnetometer.alpha;
+//     let beta = magnetometer.beta;
+//     let gamma = magnetometer.gamma;
     
-    // Approximate magnetic vector assuming device orientation
-    // This becomes unreliable when device is vertical
-    magVec = {
-      x: -Math.cos(beta) * Math.sin(alpha),
-      y: -Math.sin(beta),
-      z: -Math.cos(beta) * Math.cos(alpha)
-    };
-  }
+//     // Approximate magnetic vector assuming device orientation
+//     // This becomes unreliable when device is vertical
+//     magVec = {
+//       x: -Math.cos(beta) * Math.sin(alpha),
+//       y: -Math.sin(beta),
+//       z: -Math.cos(beta) * Math.cos(alpha)
+//     };
+//   }
   
-  // Step 3: Project magnetic vector onto horizontal plane (perpendicular to gravity)
-  // This removes the vertical component to get true north direction
-  let dotMG = magVec.x * up.x + magVec.y * up.y + magVec.z * up.z;
-  let northWorld = {
-    x: magVec.x - dotMG * up.x,
-    y: magVec.y - dotMG * up.y,
-    z: magVec.z - dotMG * up.z
-  };
+//   // Step 3: Project magnetic vector onto horizontal plane (perpendicular to gravity)
+//   // This removes the vertical component to get true north direction
+//   let dotMG = magVec.x * up.x + magVec.y * up.y + magVec.z * up.z;
+//   let northWorld = {
+//     x: magVec.x - dotMG * up.x,
+//     y: magVec.y - dotMG * up.y,
+//     z: magVec.z - dotMG * up.z
+//   };
   
-  // Normalize to get north direction
-  northWorld = normalize(northWorld);
+//   // Normalize to get north direction
+//   northWorld = normalize(northWorld);
   
-  // Check if we got a valid north vector
-  if (northWorld.x === 0 && northWorld.y === 0 && northWorld.z === 0) {
-    // Magnetic field parallel to gravity (rare) - use fallback
-    // Create arbitrary north perpendicular to up
-    if (Math.abs(up.x) < 0.9) {
-      northWorld = normalize(cross({x: 1, y: 0, z: 0}, up));
-    } else {
-      northWorld = normalize(cross({x: 0, y: 1, z: 0}, up));
-    }
-  }
+//   // Check if we got a valid north vector
+//   if (northWorld.x === 0 && northWorld.y === 0 && northWorld.z === 0) {
+//     // Magnetic field parallel to gravity (rare) - use fallback
+//     // Create arbitrary north perpendicular to up
+//     if (Math.abs(up.x) < 0.9) {
+//       northWorld = normalize(cross({x: 1, y: 0, z: 0}, up));
+//     } else {
+//       northWorld = normalize(cross({x: 0, y: 1, z: 0}, up));
+//     }
+//   }
   
-  // Step 4: East is perpendicular to both North and Up
-  // East = North × Up
-  let east = normalize(cross(northWorld, up));
+//   // Step 4: East is perpendicular to both North and Up
+//   // East = North × Up
+//   let east = normalize(cross(northWorld, up));
   
-  // Step 5: Recalculate North to ensure perfect orthogonality
-  // North = Up × East
-  let northFinal = normalize(cross(up, east));
+//   // Step 5: Recalculate North to ensure perfect orthogonality
+//   // North = Up × East
+//   let northFinal = normalize(cross(up, east));
   
-  // Step 6: Build rotation matrix
-  // Columns are the basis vectors: [East, Up, South]
-  // South is opposite of North (toward magnetic south)
-  // worldMatrix = [
-  //   east.x,        up.x,        -northFinal.x,  0,
-  //   east.y,        up.y,        -northFinal.y,  0,
-  //   east.z,        up.z,        -northFinal.z,  0,
-  //   0,             0,            0,              1
-  // ];
+//   // Step 6: Build rotation matrix
+//   // Columns are the basis vectors: [East, Up, South]
+//   // South is opposite of North (toward magnetic south)
+//   // worldMatrix = [
+//   //   east.x,        up.x,        -northFinal.x,  0,
+//   //   east.y,        up.y,        -northFinal.y,  0,
+//   //   east.z,        up.z,        -northFinal.z,  0,
+//   //   0,             0,            0,              1
+//   // ];
   
-  // Store computed north for debugging
-  north = {
-    x: northFinal.x,
-    y: northFinal.y,
-    z: northFinal.z,
-    heading: Math.atan2(east.x, -northFinal.z) * 180 / Math.PI
-  };
-}
+//   // Store computed north for debugging
+//   north = {
+//     x: northFinal.x,
+//     y: northFinal.y,
+//     z: northFinal.z,
+//     heading: Math.atan2(east.x, -northFinal.z) * 180 / Math.PI
+//   };
+// }
 
 // Cross product helper
 function cross(a, b) {
@@ -217,35 +195,6 @@ function normalize(v) {
   return {x: 0, y: 0, z: 0};
 }
 
-function applyWorldTransform() {
-  // Apply the world-to-device transformation matrix
-  // This locks the coordinate system to world (gravity + north)
-  let m = worldMatrix;
-  
-  applyMatrix(
-    m[0], m[1], m[2], m[3],
-    m[4], m[5], m[6], m[7],
-    m[8], m[9], m[10], m[11],
-    m[12], m[13], m[14], m[15]
-  );
-}
-
-function updateScreenOrientation() {
-  // Use modern Screen Orientation API
-  if (screen.orientation) {
-    // orientation.angle: 0, 90, 180, 270
-    // orientation.type: 'portrait-primary', 'landscape-primary', etc.
-    screenOrientation = screen.orientation.angle || 0;
-  } else if (window.orientation !== undefined) {
-    // Fallback for older browsers (iOS Safari)
-    // window.orientation: 0, 90, -90, 180
-    screenOrientation = window.orientation;
-  } else {
-    // No orientation API, assume portrait
-    screenOrientation = 0;
-  }
-}
-
 // Multiply two quaternions
 function multiplyQuaternions(q1, q2) {
   return {
@@ -259,73 +208,6 @@ function multiplyQuaternions(q1, q2) {
 // Conjugate (inverse for unit quaternions)
 function conjugateQuaternion(q) {
   return {w: q.w, x: -q.x, y: -q.y, z: -q.z};
-}
-
-// Convert Euler angles to rotation matrix (ZXY intrinsic rotation)
-function eulerToRotationMatrix(alpha, beta, gamma) {
-  // Pre-calculate trig values
-  let cA = Math.cos(alpha);
-  let sA = Math.sin(alpha);
-  let cB = Math.cos(beta);
-  let sB = Math.sin(beta);
-  let cG = Math.cos(gamma);
-  let sG = Math.sin(gamma);
-  
-  // Rotation matrix for ZXY order (standard for device orientation)
-  // This is more stable than sequential rotations
-  let m = [];
-  
-  m[0] = cA * cG - sA * sB * sG;
-  m[1] = -cB * sA;
-  m[2] = cA * sG + cG * sA * sB;
-  m[3] = 0;
-  
-  m[4] = cG * sA + cA * sB * sG;
-  m[5] = cA * cB;
-  m[6] = sA * sG - cA * cG * sB;
-  m[7] = 0;
-  
-  m[8] = -cB * sG;
-  m[9] = sB;
-  m[10] = cB * cG;
-  m[11] = 0;
-  
-  m[12] = 0;
-  m[13] = 0;
-  m[14] = 0;
-  m[15] = 1;
-  
-  return m;
-}
-
-function applyDeviceOrientation() {
-  // CRITICAL: Transform device coordinates to world coordinates
-  // Device: X=right, Y=down, Z=out of back
-  // World (desired): X=east, Y=up, Z=south (OpenGL convention)
-  
-  // Step 1: Get the device orientation quaternion
-  let q = deviceQuat;
-  
-  // Step 2: Account for screen orientation (portrait/landscape)
-  let screenRotQuat = createScreenOrientationQuaternion();
-  q = multiplyQuaternions(q, screenRotQuat);
-  
-  // Step 3: Transform from device space to world space
-  // Rotate 90° around X to make Y point up instead of down
-  let deviceToWorld = {w: Math.cos(-Math.PI/4), x: Math.sin(-Math.PI/4), y: 0, z: 0};
-  q = multiplyQuaternions(deviceToWorld, q);
-  
-  // Step 4: Invert to get world-to-camera (we want inverse transform)
-  q = conjugateQuaternion(q);
-  
-  // Step 5: Apply the rotation matrix
-  let m = quaternionToMatrix(q);
-  applyMatrix(
-    m[0], m[1], m[2], m[3],
-    m[4], m[5], m[6], m[7],
-    m[8], m[9], m[10], m[11],
-    m[12], m[13], m[14], m[15]
-  );
 }
 
 // // Alternative: Use quaternion directly (even more robust)
@@ -369,29 +251,6 @@ function eulerToQuaternion(alpha, beta, gamma) {
   let z = cX * cY * sZ + sX * sY * cZ;
 
   return {w: w, x: x, y: y, z: z};
-}
-
-// Convert quaternion to rotation matrix
-function quaternionToMatrix(q) {
-  let w = q.w, x = q.x, y = q.y, z = q.z;
-  
-  return [
-    1 - 2*y*y - 2*z*z, 2*x*y - 2*w*z, 2*x*z + 2*w*y, 0,
-    2*x*y + 2*w*z, 1 - 2*x*x - 2*z*z, 2*y*z - 2*w*x, 0,
-    2*x*z - 2*w*y, 2*y*z + 2*w*x, 1 - 2*x*x - 2*y*y, 0,
-    0, 0, 0, 1
-  ];
-}
-
-function createScreenOrientationQuaternion() {
-  // Rotate around Z-axis based on screen orientation
-  let angle = -screenOrientation * Math.PI / 180;
-  return {
-    w: Math.cos(angle / 2),
-    x: 0,
-    y: 0,
-    z: Math.sin(angle / 2)
-  };
 }
 
 function quaternionToMatrix3(q) {

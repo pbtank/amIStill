@@ -12,16 +12,6 @@ function shortestAngle(a, b) {
   return Math.atan2(Math.sin(b - a), Math.cos(b - a));
 }
 
-// Fixed world direction for star motion (North = -Z axis)
-// const MOTION_DIR = { x: 0, y: 0, z: -1 };
-
-// function touchStarted() {
-//   if (typeof DeviceOrientationEvent !== "undefined" &&
-//       typeof DeviceOrientationEvent.requestPermission === "function") {
-//     DeviceOrientationEvent.requestPermission();
-//   }
-// }
-
 // // Listen to device orientation
 // window.addEventListener("deviceorientation", e => {
 //   //if (e.alpha == null) return;
@@ -46,9 +36,6 @@ function shortestAngle(a, b) {
 
 function setup() {
   createCanvas(windowWidth, windowHeight, WEBGL);
-
-  // // Try to use raw Magnetometer API (best option)
-  // initMagnetometer();
   
   // Request permission for iOS 13+
   if (typeof DeviceMotionEvent !== 'undefined' && 
@@ -86,24 +73,10 @@ function setup() {
   hud = createGraphics(500, 500);
   hud.pixelDensity(1);
   hud.textSize(16);
-
-  // Track screen orientation using modern API
-  if (screen.orientation) {
-    screen.orientation.addEventListener('change', updateScreenOrientation);
-  }
-  updateScreenOrientation();
 }
-
-// function mouseDragged() {
-//   yaw = map(mouseX, 0, width, 0, radians(180));
-// }
 
 function draw() {
   background(0);
-  // getSensors();
-  //translate(width * 0.5, height * 0.5);
-
-  // updateOrientation();
 
   // if (worldMatrix) {
   //   applyWorldTransform();
@@ -113,15 +86,6 @@ function draw() {
     drawWorldLockedArrow();
     drawReferenceGrid();
   }
-
-  // // apply REAL-WORLD rotation
-  // // (inverse rotation = camera transform)
-  // cameraZ = (height/2)/tan(PI/6);
-  // // translate(0, 0, -cameraZ);
-  // rotateZ(-yaw);
-  // rotateX(-pitch);
-  // rotateY(-roll);
-  // // translate(0, 0, cameraZ);
 
   // update all stars
   for (let i = 0; i < STAR_COUNT; i++) {
@@ -164,12 +128,12 @@ function draw() {
   // hud text
   hud.clear();
   hud.fill(255, 0, 0);
-  hud.text("Test 11c", 10, 30);
+  hud.text("Test 11d", 10, 30);
   if (gravity) {
     hud.text("g : " + gravity.x.toFixed(3) + ", " + gravity.y.toFixed(3) + ", " + gravity.z.toFixed(3), 50, 50);
   }
-  if (north){
-    hud.text("N : " + north.x.toFixed(3) + ", " + north.y.toFixed(3) + ", " + north.z.toFixed(3), 50, 70);
+  if (worldMatrix){
+    hud.text("q : ", 50, 70);
   }
   push();
   resetMatrix();
@@ -211,28 +175,7 @@ function Star() {
     strokeWeight(w);
     stroke(255);
     point(this.x, this.y, this.z);
-
-    //stLine(px, py, sxx, syy, c1, c2);
   };
-}
-
-// ------------- TRAIL LINE -------------
-
-function stLine(x1, y1, x2, y2, c1, c2) {
-  const segs = 3;
-  for (let i = 0; i < segs; i++) {
-    let t1 = i / segs;
-    let t2 = (i + 1) / segs;
-
-    let sx1 = lerp(x1, x2, t1);
-    let sy1 = lerp(y1, y2, t1);
-    let sx2 = lerp(x1, x2, t2);
-    let sy2 = lerp(y1, y2, t2);
-
-    //stroke(lerp(c1, c2, t1));
-    stroke(255);
-    line(sx1, sy1, sx2, sy2);
-  }
 }
 
 function windowResized() {
@@ -288,18 +231,5 @@ function drawReferenceGrid() {
     line(i * 50, 0, -250, i * 50, 0, 250);
     line(-250, 0, i * 50, 250, 0, i * 50);
   }
-  
-  // // Compass directions
-  // fill(100, 200, 100);
-  // noStroke();
-  // textAlign(CENTER, CENTER);
-  // textSize(20);
-  
-  // push();
-  // translate(0, -10, -200);
-  // rotateX(PI / 2);
-  // text('N', 0, 0);
-  // pop();
-  
   pop();
 }
