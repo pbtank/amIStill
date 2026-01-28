@@ -51,20 +51,25 @@ function setup() {
     window.addEventListener('devicemotion', handleMotion, true);
   }
   
-  // Fallback: Use DeviceOrientation if Magnetometer API not available
-  if (typeof DeviceOrientationEvent !== 'undefined' && 
-      typeof DeviceOrientationEvent.requestPermission === 'function') {
-    DeviceOrientationEvent.requestPermission()
-      .then(response => {
-        if (response === 'granted') {
-          window.addEventListener('deviceorientationabsolute', handleOrientation, true);
-        }
-      })
-      .catch(console.error);
-  } else {
-    // window.addEventListener('deviceorientationabsolute', handleOrientation, true);
-    window.addEventListener('deviceorientation', handleOrientation);
-  }
+  // // Fallback: Use DeviceOrientation if Magnetometer API not available
+  // if (typeof DeviceOrientationEvent !== 'undefined' && 
+  //     typeof DeviceOrientationEvent.requestPermission === 'function') {
+  //   DeviceOrientationEvent.requestPermission()
+  //     .then(response => {
+  //       if (response === 'granted') {
+  //         window.addEventListener('deviceorientationabsolute', handleOrientation, true);
+  //       }
+  //     })
+  //     .catch(console.error);
+  // } else {
+  // window.addEventListener('deviceorientation', handleOrientation);
+  window.addEventListener('deviceorientation', (event) => {
+    let quat = eulerToQuaternion(radians(event.alpha), radians(event.beta), radians(event.gamma));
+    let conjQuat = conjugateQuaternion(quat);
+
+    worldMatrix = quaternionToMatrix4(conjQuat);
+  });
+  // }
 
   for (let i = 0; i < STAR_COUNT; i++) {
     stars[i] = new Star();
@@ -128,7 +133,7 @@ function draw() {
   // hud text
   hud.clear();
   hud.fill(255, 0, 0);
-  hud.text("Test 11i", 10, 30);
+  hud.text("Test 11j", 10, 30);
   if (gravity) {
     hud.text("g : " + gravity.x.toFixed(3) + ", " + gravity.y.toFixed(3) + ", " + gravity.z.toFixed(3), 50, 50);
   }

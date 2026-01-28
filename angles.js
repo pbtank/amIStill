@@ -43,51 +43,51 @@ function handleMotion(event) {
   }
 }
 
-function handleOrientation(event) {
-  // Store raw magnetometer data if available
-  // We'll compute north vector ourselves using gravity
+// function handleOrientation(event) {
+//   // Store raw magnetometer data if available
+//   // We'll compute north vector ourselves using gravity
   
-  if (event.webkitCompassHeading !== undefined) {
-    // iOS - store heading for now
-    magnetometer = {
-      heading: event.webkitCompassHeading,
-      alpha: event.alpha,
-      beta: event.beta,
-      gamma: event.gamma
-    };
-  } else if (event.alpha !== null) {
-    // Android - store Euler angles
-    if (!magnetometer) {
-      magnetometer = {alpha:0, beta:0, gamma:0};
-      _magnetometer = {alpha:0, beta:0, gamma:0};
-    }
+//   if (event.webkitCompassHeading !== undefined) {
+//     // iOS - store heading for now
+//     magnetometer = {
+//       heading: event.webkitCompassHeading,
+//       alpha: event.alpha,
+//       beta: event.beta,
+//       gamma: event.gamma
+//     };
+//   } else if (event.alpha !== null) {
+//     // Android - store Euler angles
+//     if (!magnetometer) {
+//       magnetometer = {alpha:0, beta:0, gamma:0};
+//       _magnetometer = {alpha:0, beta:0, gamma:0};
+//     }
 
-    _magnetometer = {
-      alpha: radians(event.alpha || 0),
-      beta: radians(event.beta || 0),
-      gamma: radians(event.gamma || 0)
-    };
+//     _magnetometer = {
+//       alpha: radians(event.alpha || 0),
+//       beta: radians(event.beta || 0),
+//       gamma: radians(event.gamma || 0)
+//     };
     
-    // // Normalize gravity vector
-    // let mag = Math.sqrt(_magnetometer.alpha * _magnetometer.alpha + _magnetometer.beta * _magnetometer.beta + _magnetometer.gamma * _magnetometer.gamma);
-    // if (mag > 0.1) {
-    //   _magnetometer.alpha /= mag;
-    //   _magnetometer.beta /= mag;
-    //   _magnetometer.gamma /= mag;
-    // }
+//     // // Normalize gravity vector
+//     // let mag = Math.sqrt(_magnetometer.alpha * _magnetometer.alpha + _magnetometer.beta * _magnetometer.beta + _magnetometer.gamma * _magnetometer.gamma);
+//     // if (mag > 0.1) {
+//     //   _magnetometer.alpha /= mag;
+//     //   _magnetometer.beta /= mag;
+//     //   _magnetometer.gamma /= mag;
+//     // }
 
-    magnetometer.alpha += SMOOTH * (_magnetometer.alpha - magnetometer.alpha);
-    magnetometer.beta += SMOOTH * (_magnetometer.beta - magnetometer.beta);
-    magnetometer.gamma += SMOOTH * (_magnetometer.gamma - magnetometer.gamma);
+//     magnetometer.alpha += SMOOTH * (_magnetometer.alpha - magnetometer.alpha);
+//     magnetometer.beta += SMOOTH * (_magnetometer.beta - magnetometer.beta);
+//     magnetometer.gamma += SMOOTH * (_magnetometer.gamma - magnetometer.gamma);
 
-    let quat = eulerToQuaternion(radians(event.alpha), radians(event.beta), radians(event.gamma));
-    let conjQuat = conjugateQuaternion(quat);
+//     let quat = eulerToQuaternion(radians(event.alpha), radians(event.beta), radians(event.gamma));
+//     let conjQuat = conjugateQuaternion(quat);
 
-    worldMatrix = quaternionToMatrix4(conjQuat);
-  }
+//     worldMatrix = quaternionToMatrix4(conjQuat);
+//   }
   
-  // updateWorldMatrix();
-}
+//   // updateWorldMatrix();
+// }
 
 // function updateWorldMatrix() {
 //   if (!gravity || !magnetometer) return;
